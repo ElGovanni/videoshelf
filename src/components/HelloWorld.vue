@@ -82,6 +82,11 @@
       <li>
         <a href="https://news.vuejs.org" target="_blank" rel="noopener">News</a>
       </li>
+      <li>
+        <a href="https://vuetifyjs.com" target="_blank" ref="noopener"
+          >Vuetify</a
+        >
+      </li>
     </ul>
     <h3>Ecosystem</h3>
     <ul>
@@ -119,14 +124,17 @@
 </template>
 
 <script lang="ts">
-import Vue from "vue";
+import { Component, Vue, Prop } from "vue-property-decorator";
 
-export default Vue.extend({
-  name: "HelloWorld",
-  props: {
-    msg: String
+@Component
+export default class HelloWorld extends Vue {
+  @Prop({ required: true }) msg!: string;
+  created(): void {
+    this.$http.get(
+      `http://www.omdbapi.com/?i=tt3896198&apikey=${process.env.VUE_APP_OMDB_KEY}`
+    );
   }
-});
+}
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
