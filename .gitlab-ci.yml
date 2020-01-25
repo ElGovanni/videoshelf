@@ -1,0 +1,36 @@
+image: node:latest
+cache:
+  paths:
+    - node_modules/
+
+build:
+  stage: build
+  script:
+    - yarn install --progress=false
+    - yarn build
+
+test:
+  stage: test
+  script:
+    - yarn install --progress=false
+    - yarn test:unit
+    - yarn lint
+
+pages:
+  stage: deploy
+  dependencies:
+    - build
+    - test
+  before_script:
+    - echo "VUE_APP_BASE_ROUTE = /$PROJECT_NAME/" >> .env.local
+  script:
+    - yarn build
+    - mv public public-vue
+    - mv dist public
+
+  artifacts:
+    expire_in: 1 week
+    paths:
+      - public
+  only:
+    - master

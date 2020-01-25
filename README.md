@@ -1,5 +1,5 @@
 # videoshelf
-It's a PWA app for your video list
+PWA for movies list
 
 ## Project setup
 ```
