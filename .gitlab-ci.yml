@@ -22,8 +22,8 @@ pages:
     - build
     - test
   before_script:
-    - echo "VUE_APP_BASE_ROUTE = /$PROJECT_NAME/" >> .env.local
-    - echo "VUE_APP_OMDB_KEY = $API_OMDB_KEY" >> .env.local
+    - echo "VUE_APP_BASE_ROUTE=/$PROJECT_NAME/" >> .env.local
+    - echo "VUE_APP_OMDB_KEY=$API_OMDB_KEY" >> .env.local
   script:
     - yarn build
     - mv public public-vue

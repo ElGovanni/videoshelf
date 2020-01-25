@@ -1,6 +1,12 @@
 # videoshelf
 PWA for movies list
 
+
+
+[![pipeline status](https://gitlab.com/ElGovanni/videoshelf/badges/master/pipeline.svg)](https://ElGovanni.gitlab.io/videoshelf)
+
+
+
 ## Project setup
 ```
 yarn install
