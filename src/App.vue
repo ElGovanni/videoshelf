@@ -78,7 +78,7 @@ export default class App extends Vue {
     this.search = true;
     this.$http
       .get(
-        `http://www.omdbapi.com/?apikey=${process.env.VUE_APP_OMDB_KEY}&s=${this.query}&type[]=series&type[]=movie`
+        `//www.omdbapi.com/?apikey=${process.env.VUE_APP_OMDB_KEY}&s=${this.query}&type[]=series&type[]=movie`
       )
       .then(response => {
         this.search = false;
