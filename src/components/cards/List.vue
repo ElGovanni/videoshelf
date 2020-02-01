@@ -1,5 +1,5 @@
 <template>
-  <v-card class="row">
+  <v-card class="row" @click="save(movie)">
     <div
       class="d-flex flex-no-wrap justify-space-between row col-xs-12 col-lg-11 pt-0 pb-0"
     >
@@ -22,10 +22,23 @@
 
 <script lang="ts">
 import { Component, Vue, Prop } from "vue-property-decorator";
+import Movie from "@/models/Movie";
 @Component
 export default class List extends Vue {
   @Prop({ required: true }) movie!: {};
   noImage: string = require("@/assets/no_picture_available.png");
+  save(movie: any): void {
+    if (
+      this.$store.state.list.filter((e: Movie) => e.id === movie.imdbID)
+        .length > 0
+    ) {
+      return;
+    }
+    this.$store.dispatch("add", {
+      id: movie.imdbID,
+      status: 0
+    });
+  }
 }
 </script>
 
