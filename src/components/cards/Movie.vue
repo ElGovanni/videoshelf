@@ -15,14 +15,14 @@
     </v-card-subtitle>
 
     <v-card-actions>
-      <v-btn text><a :href="externalLink" target="_blank">IMDB</a></v-btn>
+      <v-btn text :href="externalLink" target="_blank">IMDB</v-btn>
 
-      <v-btn color="purple" text>
-        <!--todo action-->
+      <v-btn color="purple" text @click="watched">
         Watched
       </v-btn>
 
       <v-spacer></v-spacer>
+      <v-btn icon @click="remove"><v-icon>mdi-close</v-icon></v-btn>
 
       <v-btn icon @click="show = !show">
         <v-icon>{{ show ? "mdi-chevron-up" : "mdi-chevron-down" }}</v-icon>
@@ -50,6 +50,7 @@ export default class Movie extends Vue {
   show: boolean = false;
   loading: boolean = true;
   movieDetail: {
+    id: string;
     score: number;
     image: string;
     title: string;
@@ -59,6 +60,7 @@ export default class Movie extends Vue {
     plot: string;
     type: string;
   } = {
+    id: "0",
     score: 0.1,
     image: "",
     title: "Title",
@@ -71,13 +73,29 @@ export default class Movie extends Vue {
   get externalLink(): string {
     return `https://www.imdb.com/title/${this.movie.id}/?ref_=videoshelf`;
   }
+  remove(): void {
+    this.$store.dispatch("remove", { ...this.movie });
+  }
+  watched(): void {
+    //todo
+  }
   created(): void {
+    this.loadData();
+  }
+  updated(): void {
+    this.loadData();
+  }
+  loadData(): void {
     this.$http
-      .get(
-        `//www.omdbapi.com/?i=${this.movie.id}&apikey=${process.env.VUE_APP_OMDB_KEY}`
-      )
+      .get(`//www.omdbapi.com/`, {
+        params: {
+          i: this.movie.id,
+          apikey: process.env.VUE_APP_OMDB_KEY
+        }
+      })
       .then(response => {
         this.movieDetail = {
+          id: response.data.imdbID,
           score: response.data.imdbRating,
           image: response.data.Poster,
           title: response.data.Title,

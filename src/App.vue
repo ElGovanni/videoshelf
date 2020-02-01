@@ -50,6 +50,12 @@
     </v-app-bar>
     <v-container class="padding">
       <router-view />
+      <v-snackbar v-model="snackbar" :timeout="4000" color="error">
+        {{ error }}
+        <v-btn color="white" text @click="snackbar = false">
+          Close
+        </v-btn>
+      </v-snackbar>
     </v-container>
   </v-app>
 </template>
@@ -64,6 +70,8 @@ export default class App extends Vue {
   search: boolean = false;
   query: string = "";
   queryList: [] = [];
+  snackbar: boolean = false;
+  error: string = "";
 
   get dark(): string | null {
     return localStorage.getItem("dark");
@@ -77,14 +85,24 @@ export default class App extends Vue {
   makeQuery(): void {
     this.search = true;
     this.$http
-      .get(
-        `//www.omdbapi.com/?apikey=${process.env.VUE_APP_OMDB_KEY}&s=${this.query}&type[]=series&type[]=movie`
-      )
+      .get(`//www.omdbapi.com/`, {
+        params: {
+          s: this.query,
+          type: ["series", "movie"],
+          apikey: process.env.VUE_APP_OMDB_KEY
+        }
+      })
       .then(response => {
-        this.search = false;
-        this.dialog = true;
-        this.query = "";
-        this.queryList = response.data.Search;
+        if (response.data.Response !== "False") {
+          this.search = false;
+          this.dialog = true;
+          this.query = "";
+          this.queryList = response.data.Search;
+        } else {
+          this.snackbar = true;
+          this.error = response.data.Error;
+          this.search = false;
+        }
       });
   }
 

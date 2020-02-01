@@ -1,11 +1,22 @@
 <template>
   <v-row align="start" justify="center">
     <movie
-      v-for="(item, index) in list"
+      v-for="(item, index) in shelf"
       :key="index"
       :movie="item"
       class="margin col-lg-3 col-sm-12 col-md-4"
     />
+    <v-container fluid class="container">
+      <v-row
+        justify="center"
+        align="center"
+        v-if="shelf.length === 0"
+        width="100%"
+        style="height: 300px;"
+      >
+        <h1 class="text-center">Find and add your movies to shelf</h1>
+      </v-row>
+    </v-container>
   </v-row>
 </template>
 
@@ -17,15 +28,17 @@ import Movie from "@/components/cards/Movie.vue";
   components: { Movie }
 })
 export default class Home extends Vue {
-  list: { id: string; status: number }[] = [
-    { id: "tt5180504", status: 0 },
-    { id: "tt2861424", status: 0 },
-    { id: "tt0816692", status: 0 }
-  ];
+  get shelf(): Movie[] {
+    return this.$store.getters.toWatch;
+  }
 }
 </script>
 
 <style scoped>
+.container {
+  height: 100%;
+  opacity: 0.5;
+}
 .margin {
   margin: 14px;
   padding: 0;
