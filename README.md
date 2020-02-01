@@ -1,11 +1,10 @@
 # videoshelf
 PWA for movies list
 
-
-
 [![pipeline status](https://gitlab.com/ElGovanni/videoshelf/badges/master/pipeline.svg)](https://ElGovanni.gitlab.io/videoshelf)
 
-
+<h2>[Demo](https://ElGovanni.gitlab.io/videoshelf)</h2>
+<img alt="Preview" src="https://i.imgur.com/ZFshj0K.png" />
 
 ## Project setup
 ```
