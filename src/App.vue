@@ -4,15 +4,17 @@
       <v-switch v-model="dark" hide-details inset>Dark theme</v-switch>
       <v-spacer></v-spacer>
       <v-text-field
-        hide-details
         single-line
         placeholder="Search"
         v-model="query"
         class="pr-2"
+        v-validate="'min:2'"
+        :error-messages="errors.collect('search')"
+        name="search"
         @keyup.enter="makeQuery"
       />
       <v-btn
-        :disabled="search"
+        :disabled="search || query.length <= 1"
         :loading="search"
         color="primary"
         outlined
@@ -39,14 +41,16 @@
           </v-toolbar>
           <v-container>
             <list
-              v-for="(item, index) in queryList"
-              :key="index"
+              v-for="item in queryList"
+              :key="item.imdbID"
               :movie="item"
               class="list-item"
+              @display="displayDetails"
             />
           </v-container>
         </v-card>
       </v-dialog>
+      <movie-dialog ref="movieDialog" />
     </v-app-bar>
     <v-container class="padding">
       <router-view />
@@ -60,16 +64,24 @@
   </v-app>
 </template>
 <script lang="ts">
-import { Component, Vue } from "vue-property-decorator";
+import { Component, Provide, Vue } from "vue-property-decorator";
 import List from "@/components/cards/List.vue";
+import { Movie as MovieType, MovieService } from "@/models/Movie";
+import MovieModule from "@/services/Movie";
+import { Query } from "@/models/Query";
+import { QueryRecord } from "@/models/QueryRecord";
+import MovieDialog from "@/components/dialogs/Movie.vue";
+
 @Component({
-  components: { List }
+  components: { List, MovieDialog }
 })
 export default class App extends Vue {
+  @Provide() movieService: MovieService = MovieModule;
+
   dialog: boolean = false;
   search: boolean = false;
   query: string = "";
-  queryList: [] = [];
+  queryList: QueryRecord[] = [];
   snackbar: boolean = false;
   error: string = "";
 
@@ -82,28 +94,32 @@ export default class App extends Vue {
     this.$vuetify.theme.dark = Boolean(value);
   }
 
-  makeQuery(): void {
+  async makeQuery(): Promise<void> {
+    if (!(await this.$validator.validateAll())) {
+      return;
+    }
     this.search = true;
-    this.$http
-      .get(`//www.omdbapi.com/`, {
-        params: {
-          s: this.query,
-          type: ["series", "movie"],
-          apikey: process.env.VUE_APP_OMDB_KEY
-        }
-      })
-      .then(response => {
-        if (response.data.Response !== "False") {
-          this.search = false;
-          this.dialog = true;
-          this.query = "";
-          this.queryList = response.data.Search;
-        } else {
-          this.snackbar = true;
-          this.error = response.data.Error;
-          this.search = false;
-        }
-      });
+    let result!: Query;
+
+    await this.movieService
+      .find(this.query)
+      .then(response => (result = response));
+
+    if (result.Response !== "False") {
+      this.search = false;
+      this.dialog = true;
+      this.query = "";
+      this.queryList = result.Search;
+    } else {
+      this.snackbar = true;
+      this.error = result.Error;
+      this.search = false;
+    }
+  }
+
+  displayDetails(movie: MovieType): void {
+    //@ts-ignore
+    this.$refs.movieDialog.open(movie);
   }
 
   created() {

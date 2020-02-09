@@ -1,5 +1,5 @@
 <template>
-  <v-card class="row" @click="save(movie)">
+  <v-card class="row" :loading="loading" @click="showDetails(movie)">
     <div
       class="d-flex flex-no-wrap justify-space-between row col-xs-12 col-lg-11 pt-0 pb-0"
     >
@@ -21,23 +21,27 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue, Prop } from "vue-property-decorator";
-import Movie from "@/models/Movie";
+import { Component, Vue, Prop, Inject } from "vue-property-decorator";
+import { MovieService } from "@/models/Movie";
+import { QueryRecord } from "@/models/QueryRecord";
 @Component
 export default class List extends Vue {
-  @Prop({ required: true }) movie!: {};
+  @Prop({ required: true }) movie!: QueryRecord;
+  @Inject() readonly movieService!: MovieService;
+
   noImage: string = require("@/assets/no_picture_available.png");
-  save(movie: any): void {
-    if (
-      this.$store.state.list.filter((e: Movie) => e.id === movie.imdbID)
-        .length > 0
-    ) {
-      return;
-    }
-    this.$store.dispatch("add", {
-      id: movie.imdbID,
-      status: 0
+  loading: boolean = false;
+  movieDetails: any = {};
+
+  async showDetails(movie: QueryRecord): Promise<void> {
+    this.loading = true;
+
+    await this.movieService.load(movie.imdbID).then(response => {
+      this.movieDetails = response;
     });
+
+    this.loading = false;
+    this.$emit("display", this.movieDetails);
   }
 }
 </script>

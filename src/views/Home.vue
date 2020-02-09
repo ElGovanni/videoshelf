@@ -1,8 +1,8 @@
 <template>
   <v-row align="start" justify="center">
     <movie
-      v-for="(item, index) in shelf"
-      :key="index"
+      v-for="item in shelf"
+      :key="item.id"
       :movie="item"
       class="margin col-lg-3 col-sm-12 col-md-4"
     />
