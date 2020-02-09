@@ -1,17 +1,20 @@
 <template>
   <v-card max-width="344" :loading="loading">
-    <span class="rating v-chip">{{ movieDetail.score }}</span>
-    <v-img :src="movieDetail.image" height="400px"></v-img>
+    <span class="rating v-chip">{{ movieDetail.imdbRating }}</span>
+    <v-img
+      :src="movieDetail.Poster === 'N/A' ? noImage : movieDetail.Poster"
+      height="400px"
+    ></v-img>
 
     <v-card-title>
-      {{ movieDetail.title }}
+      {{ movieDetail.Title }}
     </v-card-title>
 
     <v-card-subtitle>
-      Released: {{ movieDetail.released.toLocaleDateString() }}<br />
-      Rated: {{ movieDetail.rated }}<br />
-      Genre: {{ movieDetail.genre }}<br />
-      Type: {{ movieDetail.type }}<br />
+      Released: {{ movieDetail.Released }}<br />
+      Rated: {{ movieDetail.Rated }}<br />
+      Genre: {{ movieDetail.Genre }}<br />
+      Type: {{ movieDetail.Type }}<br />
     </v-card-subtitle>
 
     <v-card-actions>
@@ -24,7 +27,7 @@
       <v-spacer></v-spacer>
       <v-btn icon @click="remove"><v-icon>mdi-close</v-icon></v-btn>
 
-      <v-btn icon @click="show = !show">
+      <v-btn icon @click="show = !show" :disabled="!movieDetail.Plot">
         <v-icon>{{ show ? "mdi-chevron-up" : "mdi-chevron-down" }}</v-icon>
       </v-btn>
     </v-card-actions>
@@ -34,7 +37,7 @@
         <v-divider></v-divider>
 
         <v-card-text>
-          {{ movieDetail.plot }}
+          {{ movieDetail.Plot }}
         </v-card-text>
       </div>
     </v-expand-transition>
@@ -42,34 +45,33 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue, Prop } from "vue-property-decorator";
+import { Component, Vue, Prop, Inject } from "vue-property-decorator";
+import { Movie as MovieType, MovieService } from "@/models/Movie";
 
 @Component
 export default class Movie extends Vue {
   @Prop({ required: true }) movie!: { id: string; status: number };
+  @Inject() readonly movieService!: MovieService;
+  noImage: string = require("@/assets/no_picture_available.png");
+
   show: boolean = false;
   loading: boolean = true;
-  movieDetail: {
-    id: string;
-    score: number;
-    image: string;
-    title: string;
-    released: Date;
-    rated: string;
-    genre: string;
-    plot: string;
-    type: string;
-  } = {
-    id: "0",
-    score: 0.1,
-    image: "",
-    title: "Title",
-    released: new Date(),
-    rated: "",
-    genre: "",
-    plot: "",
-    type: ""
+  movieDetail: MovieType = {
+    Country: "",
+    Genre: "",
+    imdbRating: 0.0,
+    Language: "",
+    Metascore: "",
+    Plot: "",
+    Poster: "N/A",
+    Rated: "",
+    Released: "",
+    Type: "",
+    Year: "",
+    Title: "Title",
+    imdbID: "0"
   };
+
   get externalLink(): string {
     return `https://www.imdb.com/title/${this.movie.id}/?ref_=videoshelf`;
   }
@@ -80,33 +82,10 @@ export default class Movie extends Vue {
     //todo
   }
   created(): void {
-    this.loadData();
-  }
-  updated(): void {
-    this.loadData();
-  }
-  loadData(): void {
-    this.$http
-      .get(`//www.omdbapi.com/`, {
-        params: {
-          i: this.movie.id,
-          apikey: process.env.VUE_APP_OMDB_KEY
-        }
-      })
-      .then(response => {
-        this.movieDetail = {
-          id: response.data.imdbID,
-          score: response.data.imdbRating,
-          image: response.data.Poster,
-          title: response.data.Title,
-          released: new Date(response.data.Released),
-          rated: response.data.Rated,
-          genre: response.data.Genre,
-          plot: response.data.Plot,
-          type: response.data.Type
-        };
-        this.loading = false;
-      });
+    this.movieService
+      .load(this.movie.id)
+      .then(response => (this.movieDetail = response));
+    this.loading = false;
   }
 }
 </script>

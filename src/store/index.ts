@@ -1,15 +1,14 @@
 import Vue from "vue";
 import Vuex from "vuex";
-import Movie from "@/models/Movie";
 
 Vue.use(Vuex);
 
 export default new Vuex.Store({
   state: {
-    list: Array<Movie>()
+    list: Array<any>()
   },
   mutations: {
-    ADD_MOVIE(state, movie: Movie) {
+    ADD_MOVIE(state, movie: any) {
       state.list.push(movie);
     },
     SET_SHELF(state, shelf) {
@@ -41,10 +40,13 @@ export default new Vuex.Store({
     }
   },
   actions: {
-    init: ({ commit }, list: Movie[]) => {
+    init: ({ commit }, list: any[]) => {
       commit("SET_SHELF", list);
     },
-    add: ({ commit }, movie: Movie) => {
+    add: ({ commit, state }, movie: any) => {
+      if (state.list.filter((e: any) => e.id === movie.imdbID).length > 0) {
+        return;
+      }
       commit("ADD_MOVIE", movie);
     },
     setWatched: ({ commit }, id: string) => {
