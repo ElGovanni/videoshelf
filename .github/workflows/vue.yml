@@ -1,6 +1,7 @@
-
 name: Deploy to GitHub Pages
 on:
+  schedule:
+    - cron: '0 3 * * *' # run at 2 AM UTC
   push:
     branches:
       - master
